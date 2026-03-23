@@ -1,0 +1,67 @@
+%YAML 1.2
+---
+name: Dialogue Manager
+file_extensions:
+  - dialogue
+scope: source.dialogue
+
+contexts:
+  main:
+    - match: '^~ .*'
+      scope: entity.name.function.dialogue
+    - match: '^\s*#.*'
+      scope: comment.line.dialogue
+    - match: '=><?'
+      scope: keyword.control.flow.dialogue
+    - match: '\bEND\b'
+      scope: support.constant.dialogue
+    - match: '^\s*(if|elif|else|set|do|while|match|when)\b'
+      scope: keyword.control.dialogue
+      push: logic_statement
+    - match: '^\s*- '
+      scope: entity.name.tag.dialogue
+      push: dialogue_line
+    - match: '^\s*(\{\{.*?\}\}):'
+      captures:
+        1: entity.name.class.dialogue
+      push: dialogue_line
+    - match: '^\s*([a-zA-Z0-9_ ]+)\s*\((.*?)\):'
+      captures:
+        1: entity.name.class.dialogue
+        2: string.quoted.other.dialogue
+      push: dialogue_line
+    - match: '^\s*([a-zA-Z0-9_ ]+):'
+      captures:
+        1: entity.name.class.dialogue
+      push: dialogue_line
+    - include: inline_syntax
+
+  logic_statement:
+    - match: '$'
+      pop: true
+    - match: '\b(true|false)\b'
+      scope: constant.language.boolean.dialogue
+    - match: '\b(and|or|not)\b'
+      scope: keyword.operator.dialogue
+    - match: '(==|!=|<=|>=|<|>)'
+      scope: keyword.operator.dialogue
+    - match: '\b[0-9]+(\.[0-9]+)?\b'
+      scope: constant.numeric.dialogue
+    - match: '".*?"'
+      scope: string.quoted.double.dialogue
+    - include: inline_syntax
+
+  dialogue_line:
+    - match: '$'
+      pop: true
+    - match: '=><?'
+      scope: keyword.control.flow.dialogue
+    - include: inline_syntax
+
+  inline_syntax:
+    - match: '\[ID:[a-zA-Z0-9_]+\]'
+      scope: constant.language.dialogue
+    - match: '\[/?.*?\]'
+      scope: entity.name.tag.dialogue
+    - match: '\{\{.*?\}\}'
+      scope: variable.other.dialogue
